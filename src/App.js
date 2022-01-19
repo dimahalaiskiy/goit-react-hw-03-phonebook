@@ -9,10 +9,23 @@ import keyGenerator from 'keygenerator';
 class App extends Component {
 	state = {
 		contacts: [],
+		filteredContacts: [],
 		filter: '',
 		name: '',
 		number: '',
 	};
+
+	STORAGE = 'contact';
+
+	componentDidMount() {
+		this.setState({
+			contacts: JSON.parse(localStorage.getItem(this.STORAGE)),
+		});
+	}
+
+	componentDidUpdate() {
+		localStorage.setItem(this.STORAGE, JSON.stringify(this.state.contacts));
+	}
 
 	setInputValue = (e) => {
 		const { name, value } = e.target;
@@ -30,14 +43,29 @@ class App extends Component {
 	};
 
 	setFilteredContact = (e) => {
+		const { contacts } = this.state;
+		const { value } = e.target;
+
 		this.setState({
-			filter: e.target.value,
+			filter: value,
+		});
+
+		this.setState({
+			filteredContacts: contacts.filter((contact) =>
+				contact.name.toLowerCase().includes(value.toLowerCase())
+			),
 		});
 	};
 
 	deleteContact = (contactName) => {
+		const { contacts, filteredContacts } = this.state;
+
 		this.setState({
-			contacts: [...this.state.contacts.filter((contact) => contact.id !== contactName.id)],
+			contacts: contacts.filter((contact) => contact.id !== contactName.id),
+		});
+
+		this.setState({
+			filteredContacts: filteredContacts.filter((contact) => contact.id !== contactName.id),
 		});
 	};
 
@@ -57,6 +85,7 @@ class App extends Component {
 					filteredValue={this.state.filter}
 				/>
 				<Contacts
+					filteredContacts={this.state.filteredContacts}
 					contacts={this.state.contacts}
 					filter={this.state.filter}
 					deleteContact={this.deleteContact}
