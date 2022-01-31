@@ -5,11 +5,12 @@ import Contacts from './Components/Contacts';
 import FilterContactsInput from './Components/FilterContactsInput';
 import { Container } from './Components/Title/Title.styled';
 import keyGenerator from 'keygenerator';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 class App extends Component {
 	state = {
 		contacts: [],
-		filteredContacts: [],
 		filter: '',
 		name: '',
 		number: '',
@@ -18,9 +19,12 @@ class App extends Component {
 	STORAGE = 'contact';
 
 	componentDidMount() {
-		this.setState({
-			contacts: JSON.parse(localStorage.getItem(this.STORAGE)),
-		});
+		let contactsData = JSON.parse(localStorage.getItem(this.STORAGE));
+		if (contactsData) {
+			this.setState({
+				contacts: JSON.parse(localStorage.getItem(this.STORAGE)),
+			});
+		}
 	}
 
 	componentDidUpdate() {
@@ -35,37 +39,38 @@ class App extends Component {
 	};
 
 	setContactName = (e) => {
-		const { contacts, name, number } = this.state;
 		e.preventDefault();
+		const { contacts, name, number } = this.state;
+
+		let isUniq = contacts.filter((contact) =>
+			contact.name.toLowerCase().includes(name.toLowerCase())
+		);
+		if (isUniq.length !== 0) {
+			toast('Контакт с таким именем уже существует!');
+			return;
+		}
+
 		this.setState({
 			contacts: [...contacts, { id: keyGenerator.password(), name, number }],
+			name: '',
 		});
+
+		e.target.reset();
 	};
 
 	setFilteredContact = (e) => {
-		const { contacts } = this.state;
 		const { value } = e.target;
 
 		this.setState({
 			filter: value,
 		});
-
-		this.setState({
-			filteredContacts: contacts.filter((contact) =>
-				contact.name.toLowerCase().includes(value.toLowerCase())
-			),
-		});
 	};
 
 	deleteContact = (contactName) => {
-		const { contacts, filteredContacts } = this.state;
+		const { contacts } = this.state;
 
 		this.setState({
 			contacts: contacts.filter((contact) => contact.id !== contactName.id),
-		});
-
-		this.setState({
-			filteredContacts: filteredContacts.filter((contact) => contact.id !== contactName.id),
 		});
 	};
 
@@ -85,11 +90,11 @@ class App extends Component {
 					filteredValue={this.state.filter}
 				/>
 				<Contacts
-					filteredContacts={this.state.filteredContacts}
 					contacts={this.state.contacts}
 					filter={this.state.filter}
 					deleteContact={this.deleteContact}
 				/>
+				<ToastContainer />
 			</Container>
 		);
 	}
