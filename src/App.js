@@ -12,8 +12,6 @@ class App extends Component {
 	state = {
 		contacts: [],
 		filter: '',
-		name: '',
-		number: '',
 	};
 
 	STORAGE = 'contact';
@@ -31,16 +29,9 @@ class App extends Component {
 		localStorage.setItem(this.STORAGE, JSON.stringify(this.state.contacts));
 	}
 
-	setInputValue = (e) => {
-		const { name, value } = e.target;
-		this.setState({
-			[name]: value,
-		});
-	};
-
-	setContactName = (e) => {
+	setContactName = (e, name, number) => {
 		e.preventDefault();
-		const { contacts, name, number } = this.state;
+		const { contacts } = this.state;
 
 		let isUniq = contacts.filter((contact) =>
 			contact.name.toLowerCase().includes(name.toLowerCase())
@@ -52,10 +43,7 @@ class App extends Component {
 
 		this.setState({
 			contacts: [...contacts, { id: keyGenerator.password(), name, number }],
-			name: '',
 		});
-
-		e.target.reset();
 	};
 
 	setFilteredContact = (e) => {
@@ -74,15 +62,17 @@ class App extends Component {
 		});
 	};
 
+	filteredContacts = () => {
+		return this.state.contacts.filter((contact) =>
+			contact.name.toLowerCase().includes(this.state.filter.toLowerCase())
+		);
+	};
+
 	render() {
 		return (
 			<Container>
 				<Title title='Phonebook'>
-					<Phonebook
-						addContact={this.setContactName}
-						inputValue={this.setInputValue}
-						contacts={this.state}
-					/>
+					<Phonebook addContact={this.setContactName} contacts={this.state.contacts} />
 				</Title>
 				<Title title='Contacts'></Title>
 				<FilterContactsInput
@@ -91,6 +81,7 @@ class App extends Component {
 				/>
 				<Contacts
 					contacts={this.state.contacts}
+					filteredContacts={this.filteredContacts()}
 					filter={this.state.filter}
 					deleteContact={this.deleteContact}
 				/>

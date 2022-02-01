@@ -5,10 +5,8 @@ import PropTypes from 'prop-types';
 
 export default class Contacts extends Component {
 	render() {
-		const filteredContacts = this.props.contacts.filter((contact) =>
-			contact.name.toLowerCase().includes(this.props.filter.toLowerCase())
-		);
-		const { contacts, deleteContact, filter } = this.props;
+		const { contacts, deleteContact, filter, filteredContacts } = this.props;
+
 		return (
 			<ContactList>
 				{filter
